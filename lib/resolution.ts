@@ -86,23 +86,23 @@ export async function validateToken(token: string): Promise<TokenValidationResul
 
     const row = ticketQuery.rows[0];
     const ticket: TicketDetalle = {
-      folio:              row.folio,
-      nombre:             row.nombre,
-      apellido:           row.apellido,
-      email:              row.email,
-      area_nombre:        row.area_nombre,
+      folio: row.folio,
+      nombre: row.nombre,
+      apellido: row.apellido,
+      email: row.email,
+      area_nombre: row.area_nombre,
       area_origen_nombre: row.area_origen_nombre,
-      prioridad:          row.prioridad          as TicketDetalle['prioridad'],
+      prioridad: row.prioridad as TicketDetalle['prioridad'],
       prioridad_original: row.prioridad_original as TicketDetalle['prioridad'],
-      mensaje:            row.mensaje,
-      status:             row.status             as TicketDetalle['status'],
+      mensaje: row.mensaje,
+      status: row.status as TicketDetalle['status'],
       responsable_nombre: row.responsable_nombre,
       mensaje_resolucion: row.mensaje_resolucion,
       motivo_cancelacion: row.motivo_cancelacion,
-      creado_en:          row.creado_en,
-      finalizado_en:      row.finalizado_en,
-      cancelado_en:       row.cancelado_en,
-      hold_activo:        row.hold_activo,
+      creado_en: row.creado_en,
+      finalizado_en: row.finalizado_en,
+      cancelado_en: row.cancelado_en,
+      hold_activo: row.hold_activo,
     };
 
     return {

@@ -12,6 +12,7 @@ import type { AdminTicketDetail } from '@/lib/tickets';
 import type { TicketEvidencia, StatusTicket, Prioridad } from '@/lib/types';
 import TicketResolutionControls, { type ResolutionActions } from '@/app/components/TicketResolutionControls';
 import EvidenceGrid from '@/app/components/EvidenceGrid';
+import { copyToClipboard } from '@/lib/clipboard';
 
 interface TicketAdminPanelProps {
   ticket: AdminTicketDetail;
@@ -38,6 +39,7 @@ export default function TicketAdminPanel({
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkWarn, setLinkWarn] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   const [assignLoading, setAssignLoading] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
@@ -118,11 +120,16 @@ export default function TicketAdminPanel({
     }
   }
 
-  function handleCopy() {
+  async function handleCopy() {
     if (linkUrl) {
-      navigator.clipboard.writeText(linkUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopyError(false);
+      const success = await copyToClipboard(linkUrl);
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        setCopyError(true);
+      }
     }
   }
 
@@ -355,22 +362,48 @@ export default function TicketAdminPanel({
         <div className="flex flex-col gap-3">
           {linkUrl ? (
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={linkUrl}
-                  className="flex-1 rounded-lg border px-3 py-2 text-xs font-mono select-all outline-none"
-                  style={{ borderColor: 'var(--color-border)', backgroundColor: 'color-mix(in srgb, var(--color-navy) 2%, transparent)' }}
-                />
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors hover:bg-black/5"
-                  style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-base)' }}
-                >
-                  {copied ? '¡Copiado!' : 'Copiar'}
-                </button>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={linkUrl}
+                    className="flex-1 rounded-lg border px-3 py-2 text-xs font-mono select-all outline-none"
+                    style={{ borderColor: 'var(--color-border)', backgroundColor: 'color-mix(in srgb, var(--color-navy) 2%, transparent)' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors hover:bg-black/5 flex items-center gap-1.5 shrink-0"
+                    style={{
+                      borderColor: copied ? 'var(--color-success)' : 'var(--color-border)',
+                      color: copied ? 'var(--color-success)' : 'var(--color-text-base)',
+                      backgroundColor: copied ? 'color-mix(in srgb, var(--color-success) 8%, transparent)' : 'transparent',
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span>¡Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                        <span>Copiar</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                {copyError && (
+                  <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                    No se pudo copiar, selecciona el texto manualmente
+                  </p>
+                )}
               </div>
 
               {linkWarn && (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { crearUsuarioAction, resetearPasswordAction } from '@/app/admin/actions/superadmin';
 import type { Area } from '@/lib/types';
 import type { UsuarioDetalle } from '@/lib/admin';
+import { copyToClipboard } from '@/lib/clipboard';
 
 interface UsuariosDashboardProps {
   initialUsuarios: UsuarioDetalle[];
@@ -30,20 +31,27 @@ export default function UsuariosDashboard({ initialUsuarios, areas }: UsuariosDa
 
   const [resetLoadingId, setResetLoadingId] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   function handleClosePasswordModal() {
     const isReset = passwordDisplay?.isReset;
     setPasswordDisplay(null);
+    setCopyError(false);
     if (!isReset) {
       window.location.reload();
     }
   }
 
-  function handleCopyPassword() {
+  async function handleCopyPassword() {
     if (passwordDisplay) {
-      navigator.clipboard.writeText(passwordDisplay.pass);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopyError(false);
+      const success = await copyToClipboard(passwordDisplay.pass);
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        setCopyError(true);
+      }
     }
   }
 
@@ -174,18 +182,44 @@ export default function UsuariosDashboard({ initialUsuarios, areas }: UsuariosDa
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--color-success) 4%, transparent)', borderColor: 'color-mix(in srgb, var(--color-success) 20%, transparent)' }}>
-              <span className="flex-1 font-mono text-lg font-bold tracking-wider select-all" style={{ color: 'var(--color-success)' }}>
-                {passwordDisplay.pass}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyPassword}
-                className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-black/5 transition-colors shrink-0"
-                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-base)' }}
-              >
-                {copied ? 'Copiado' : 'Copiar'}
-              </button>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2 rounded-lg border p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--color-success) 4%, transparent)', borderColor: 'color-mix(in srgb, var(--color-success) 20%, transparent)' }}>
+                <span className="flex-1 font-mono text-lg font-bold tracking-wider select-all" style={{ color: 'var(--color-success)' }}>
+                  {passwordDisplay.pass}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyPassword}
+                  className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-black/5 transition-colors shrink-0 flex items-center gap-1.5"
+                  style={{
+                    borderColor: copied ? 'var(--color-success)' : 'var(--color-border)',
+                    color: copied ? 'var(--color-success)' : 'var(--color-text-base)',
+                    backgroundColor: copied ? 'color-mix(in srgb, var(--color-success) 8%, transparent)' : 'transparent',
+                  }}
+                >
+                  {copied ? (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      <span>¡Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                      </svg>
+                      <span>Copiar</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {copyError && (
+                <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                  No se pudo copiar, selecciona el texto manualmente
+                </p>
+              )}
             </div>
 
             <div className="flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-xs" style={{ backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--color-warning) 30%, transparent)', color: 'var(--color-warning)' }}>
