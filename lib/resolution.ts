@@ -39,9 +39,12 @@ export async function validateToken(token: string): Promise<TokenValidationResul
       apellido: string;
       email: string;
       area_nombre: string | null;
+      area_origen_nombre: string | null;
       prioridad: string;
+      prioridad_original: string;
       mensaje: string;
       status: string;
+      responsable_nombre: string | null;
       mensaje_resolucion: string | null;
       motivo_cancelacion: string | null;
       creado_en: string;
@@ -54,10 +57,13 @@ export async function validateToken(token: string): Promise<TokenValidationResul
          t.nombre,
          t.apellido,
          t.email,
-         a.nombre AS area_nombre,
+         a.nombre   AS area_nombre,
+         ao.nombre  AS area_origen_nombre,
          t.prioridad::text,
+         t.prioridad_original::text,
          t.mensaje,
          t.status::text,
+         t.responsable_nombre,
          t.mensaje_resolucion,
          t.motivo_cancelacion,
          t.creado_en,
@@ -69,7 +75,8 @@ export async function validateToken(token: string): Promise<TokenValidationResul
                 ORDER BY iniciado_en DESC LIMIT 1) h
          ) AS hold_activo
        FROM tickets t
-       LEFT JOIN areas a ON t.area_id = a.id
+       LEFT JOIN areas a  ON t.area_id        = a.id
+       LEFT JOIN areas ao ON t.area_origen_id = ao.id
        WHERE t.id = $1
        LIMIT 1`,
       [link.ticket_id]
@@ -79,20 +86,23 @@ export async function validateToken(token: string): Promise<TokenValidationResul
 
     const row = ticketQuery.rows[0];
     const ticket: TicketDetalle = {
-      folio: row.folio,
-      nombre: row.nombre,
-      apellido: row.apellido,
-      email: row.email,
-      area_nombre: row.area_nombre,
-      prioridad: row.prioridad as TicketDetalle['prioridad'],
-      mensaje: row.mensaje,
-      status: row.status as TicketDetalle['status'],
+      folio:              row.folio,
+      nombre:             row.nombre,
+      apellido:           row.apellido,
+      email:              row.email,
+      area_nombre:        row.area_nombre,
+      area_origen_nombre: row.area_origen_nombre,
+      prioridad:          row.prioridad          as TicketDetalle['prioridad'],
+      prioridad_original: row.prioridad_original as TicketDetalle['prioridad'],
+      mensaje:            row.mensaje,
+      status:             row.status             as TicketDetalle['status'],
+      responsable_nombre: row.responsable_nombre,
       mensaje_resolucion: row.mensaje_resolucion,
       motivo_cancelacion: row.motivo_cancelacion,
-      creado_en: row.creado_en,
-      finalizado_en: row.finalizado_en,
-      cancelado_en: row.cancelado_en,
-      hold_activo: row.hold_activo,
+      creado_en:          row.creado_en,
+      finalizado_en:      row.finalizado_en,
+      cancelado_en:       row.cancelado_en,
+      hold_activo:        row.hold_activo,
     };
 
     return {
@@ -168,7 +178,9 @@ export async function updateTicketResolutionState(
   mensajeResolucion: string | null,
   holdActivo: boolean,
   holdMotivo: string | null,
-  ip: string | null
+  ip: string | null,
+  nuevaPrioridad?: string | null,
+  cambiadorNombre?: string | null
 ): Promise<void> {
 
   await query(
@@ -181,6 +193,27 @@ export async function updateTicketResolutionState(
      WHERE id = $3`,
     [status, mensajeResolucion || null, ticketId]
   );
+
+  // Cambio de prioridad (misma operación, registra historial)
+  if (nuevaPrioridad) {
+    const { rows: currentRows } = await query<{ prioridad: string }>(
+      'SELECT prioridad::text FROM tickets WHERE id = $1',
+      [ticketId]
+    );
+    const prioridadActual = currentRows[0]?.prioridad;
+
+    if (prioridadActual && prioridadActual !== nuevaPrioridad) {
+      await query(
+        'UPDATE tickets SET prioridad = $1::prioridad_ticket WHERE id = $2',
+        [nuevaPrioridad, ticketId]
+      );
+      await query(
+        `INSERT INTO ticket_priority_history (ticket_id, prioridad, cambiado_por, cambiado_ip)
+         VALUES ($1, $2::prioridad_ticket, $3, $4::inet)`,
+        [ticketId, nuevaPrioridad, cambiadorNombre || null, ip || null]
+      );
+    }
+  }
 
   if (holdActivo) {
 

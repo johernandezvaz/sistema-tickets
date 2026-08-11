@@ -221,6 +221,14 @@ export default async function AdminTicketDetailPage({
               </div>
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
+                  Área del Solicitante
+                </dt>
+                <dd className="text-sm font-semibold" style={{ color: 'var(--color-text-base)' }}>
+                  {ticket.area_origen_nombre ?? <span className="italic opacity-60">No especificada</span>}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                   Área Destino
                 </dt>
                 <dd className="text-sm font-semibold" style={{ color: 'var(--color-text-base)' }}>

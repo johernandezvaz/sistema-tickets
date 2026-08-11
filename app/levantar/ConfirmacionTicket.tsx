@@ -4,9 +4,11 @@ import Link from 'next/link';
 
 interface ConfirmacionTicketProps {
   folio: string;
+  nombre: string;
+  email: string;
 }
 
-export default function ConfirmacionTicket({ folio }: ConfirmacionTicketProps) {
+export default function ConfirmacionTicket({ folio, nombre, email }: ConfirmacionTicketProps) {
   return (
     <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-300">
 
@@ -34,7 +36,7 @@ export default function ConfirmacionTicket({ folio }: ConfirmacionTicketProps) {
         </p>
         <h2 className="mt-1 text-2xl font-bold"
           style={{ color: 'var(--color-navy)' }}>
-          ¡Tu ticket fue levantado con éxito!
+          ¡Hola {nombre}, tu ticket fue levantado con éxito!
         </h2>
       </div>
 
@@ -60,11 +62,11 @@ export default function ConfirmacionTicket({ folio }: ConfirmacionTicketProps) {
       <div
         className="w-full flex items-start gap-3 rounded-lg border px-4 py-3 text-left text-sm"
         style={{
-          borderColor: 'color-mix(in srgb, var(--color-warning) 40%, transparent)',
-          backgroundColor: 'color-mix(in srgb, var(--color-warning) 8%, transparent)',
-          color: 'var(--color-warning)',
+          borderColor: 'color-mix(in srgb, var(--color-primary) 35%, transparent)',
+          backgroundColor: 'color-mix(in srgb, var(--color-primary) 6%, transparent)',
+          color: 'var(--color-primary)',
         }}
-        role="alert"
+        role="status"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -74,13 +76,12 @@ export default function ConfirmacionTicket({ folio }: ConfirmacionTicketProps) {
           className="mt-0.5 h-4 w-4 shrink-0"
           aria-hidden="true"
         >
-          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
         </svg>
         <span>
-          <strong>Guarda este folio.</strong> Es la única forma de consultar el estado
-          de tu ticket. No te lo enviaremos por correo automáticamente.
+          Te enviamos un correo de confirmación a <strong>{email}</strong> con tu folio.
+          Consérvalo para consultar o dar seguimiento a tu solicitud.
         </span>
       </div>
 

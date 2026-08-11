@@ -109,6 +109,7 @@ export default function ResolverForm({ token, ticket, initialEvidencias }: Resol
 
         <TicketResolutionControls
           initialStatus={ticket.status}
+          initialPrioridad={ticket.prioridad}
           initialHoldActivo={ticket.hold_activo !== null}
           initialHoldMotivo={ticket.hold_activo?.motivo ?? ''}
           initialMensajeResolucion={ticket.mensaje_resolucion ?? ''}

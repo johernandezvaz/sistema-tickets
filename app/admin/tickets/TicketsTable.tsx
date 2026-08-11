@@ -39,16 +39,38 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PrioridadBadge({ prioridad }: { prioridad: string }) {
+function PrioridadBadge({ prioridad, prioridadOriginal }: { prioridad: string; prioridadOriginal?: string }) {
   const cfg: Record<string, { label: string; color: string }> = {
     baja: { label: 'Baja', color: 'var(--color-text-muted)' },
     media: { label: 'Media', color: 'var(--color-warning)' },
     alta: { label: 'Alta', color: 'var(--color-danger)' },
   };
   const { label, color } = cfg[prioridad] ?? cfg.baja;
+  const fueModificada = prioridadOriginal && prioridad !== prioridadOriginal;
+  const labelOriginal = prioridadOriginal ? (cfg[prioridadOriginal]?.label ?? prioridadOriginal) : '';
+
   return (
-    <span className="text-xs font-semibold" style={{ color }}>
-      {label}
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span className="text-xs font-semibold" style={{ color }}>
+        {label}
+      </span>
+      {fueModificada && (
+        <span
+          title={`Prioridad modificada (Original: ${labelOriginal})`}
+          className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-bold"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--color-warning) 12%, transparent)',
+            color: 'var(--color-warning)',
+            border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-2.5 w-2.5 shrink-0" aria-hidden="true">
+            <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a.75.75 0 0 0-.196.345l-.75 2.25a.75.75 0 0 0 .948.948l2.25-.75a.75.75 0 0 0 .345-.196l4.261-4.263a1.75 1.75 0 0 0 0-2.475Z" />
+            <path d="M4.75 3.5A1.75 1.75 0 0 0 3 5.25v7.5C3 13.716 3.784 14.5 4.75 14.5h7.5A1.75 1.75 0 0 0 14 12.75V9.5a.75.75 0 0 0-1.5 0v3.25a.25.25 0 0 1-.25.25h-7.5a.25.25 0 0 1-.25-.25v-7.5a.25.25 0 0 1 .25-.25H8a.75.75 0 0 0 0-1.5H4.75Z" />
+          </svg>
+          Reclasificado
+        </span>
+      )}
     </span>
   );
 }
@@ -166,7 +188,7 @@ export default function TicketsTable({ tickets }: TicketsTableProps) {
                     {t.area_nombre ?? '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <PrioridadBadge prioridad={t.prioridad} />
+                    <PrioridadBadge prioridad={t.prioridad} prioridadOriginal={t.prioridad_original} />
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={t.status} />

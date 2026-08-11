@@ -20,9 +20,12 @@ export async function buscarTicket(folio: string): Promise<BuscarTicketResult> {
       apellido: string;
       email: string;
       area_nombre: string | null;
+      area_origen_nombre: string | null;
       prioridad: string;
+      prioridad_original: string;
       mensaje: string;
       status: string;
+      responsable_nombre: string | null;
       mensaje_resolucion: string | null;
       motivo_cancelacion: string | null;
       creado_en: string;
@@ -35,17 +38,21 @@ export async function buscarTicket(folio: string): Promise<BuscarTicketResult> {
          t.nombre,
          t.apellido,
          t.email,
-         a.nombre  AS area_nombre,
+         a.nombre   AS area_nombre,
+         ao.nombre  AS area_origen_nombre,
          t.prioridad::text,
+         t.prioridad_original::text,
          t.mensaje,
          t.status::text,
+         t.responsable_nombre,
          t.mensaje_resolucion,
          t.motivo_cancelacion,
          t.creado_en,
          t.finalizado_en,
          t.cancelado_en
        FROM tickets t
-       LEFT JOIN areas a ON t.area_id = a.id
+       LEFT JOIN areas a  ON t.area_id        = a.id
+       LEFT JOIN areas ao ON t.area_origen_id = ao.id
        WHERE t.folio = $1
        LIMIT 1`,
       [normalized]
@@ -68,19 +75,22 @@ export async function buscarTicket(folio: string): Promise<BuscarTicketResult> {
       holdResult.rows.length > 0 ? holdResult.rows[0] : null;
 
     const ticket: TicketDetalle = {
-      folio: row.folio,
-      nombre: row.nombre,
-      apellido: row.apellido,
-      email: row.email,
-      area_nombre: row.area_nombre,
-      prioridad: row.prioridad as TicketDetalle['prioridad'],
-      mensaje: row.mensaje,
-      status: row.status as TicketDetalle['status'],
+      folio:              row.folio,
+      nombre:             row.nombre,
+      apellido:           row.apellido,
+      email:              row.email,
+      area_nombre:        row.area_nombre,
+      area_origen_nombre: row.area_origen_nombre,
+      prioridad:          row.prioridad          as TicketDetalle['prioridad'],
+      prioridad_original: row.prioridad_original as TicketDetalle['prioridad'],
+      mensaje:            row.mensaje,
+      status:             row.status             as TicketDetalle['status'],
+      responsable_nombre: row.responsable_nombre,
       mensaje_resolucion: row.mensaje_resolucion,
       motivo_cancelacion: row.motivo_cancelacion,
-      creado_en: row.creado_en,
-      finalizado_en: row.finalizado_en,
-      cancelado_en: row.cancelado_en,
+      creado_en:          row.creado_en,
+      finalizado_en:      row.finalizado_en,
+      cancelado_en:       row.cancelado_en,
       hold_activo,
     };
 

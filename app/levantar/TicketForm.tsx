@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { submitTicket } from '@/app/actions/tickets';
+import { sendTicketReceivedEmail, sendTicketAdminEmail } from '@/lib/emailjs';
 import type { Area, Prioridad, TicketFormErrors } from '@/lib/types';
 import ConfirmacionTicket from './ConfirmacionTicket';
 
@@ -48,9 +49,24 @@ const PRIORIDADES: { value: Prioridad; label: string; desc: string }[] = [
 export default function TicketForm({ areas }: TicketFormProps) {
   const [errors, setErrors] = useState<TicketFormErrors>({});
   const [isPending, setIsPending] = useState(false);
-  const [folio, setFolio] = useState<string | null>(null);
+  const [confirmacion, setConfirmacion] = useState<{
+    folio: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    areaNombre: string;
+    areaOrigenNombre: string;
+  } | null>(null);
 
-  if (folio) return <ConfirmacionTicket folio={folio} />;
+  if (confirmacion) {
+    return (
+      <ConfirmacionTicket
+        folio={confirmacion.folio}
+        nombre={confirmacion.nombre}
+        email={confirmacion.email}
+      />
+    );
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -62,7 +78,41 @@ export default function TicketForm({ areas }: TicketFormProps) {
       const result = await submitTicket(formData);
 
       if (result.ok) {
-        setFolio(result.folio);
+        setConfirmacion({
+          folio: result.folio,
+          nombre: result.nombre,
+          apellido: result.apellido,
+          email: result.email,
+          areaNombre: result.areaNombre,
+          areaOrigenNombre: result.areaOrigenNombre,
+        });
+
+        sendTicketReceivedEmail({
+          nombre:          result.nombre,
+          apellido:        result.apellido,
+          email:           result.email,
+          areaNombre:      result.areaNombre,
+          areaOrigenNombre: result.areaOrigenNombre,
+          folio:           result.folio,
+        }).catch((emailErr) => {
+          console.warn('[EmailJS] No se pudo enviar el correo de confirmación:', emailErr);
+        });
+
+        // Notificar a los admins del área destino (fire-and-forget)
+        sendTicketAdminEmail(
+          {
+            nombre:      result.nombre,
+            apellido:    result.apellido,
+            email:       result.email,
+            areaOrigen:  result.areaOrigenNombre,
+            areaDestino: result.areaNombre,
+            folio:       result.folio,
+            prioridad:   result.prioridad,
+          },
+          result.adminEmails
+        ).catch((adminErr) => {
+          console.warn('[EmailJS] No se pudo enviar la notificación al admin:', adminErr);
+        });
       } else {
         setErrors(result.errors);
 
@@ -147,12 +197,12 @@ export default function TicketForm({ areas }: TicketFormProps) {
       </div>
 
       <div>
-        <label htmlFor="area_id" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--color-text-base)' }}>
-          Área <span style={{ color: 'var(--color-danger)' }}>*</span>
+        <label htmlFor="area_origen_id" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--color-text-base)' }}>
+          Área del solicitante <span style={{ color: 'var(--color-danger)' }}>*</span>
         </label>
         <select
-          id="area_id"
-          name="area_id"
+          id="area_origen_id"
+          name="area_origen_id"
           defaultValue=""
           style={{
             ...inputBase,
@@ -162,12 +212,12 @@ export default function TicketForm({ areas }: TicketFormProps) {
             backgroundPosition: 'right 0.75rem center',
             backgroundSize: '1.25rem',
             paddingRight: '2.5rem',
-            ...(errors.area_id ? inputError : {}),
+            ...(errors.area_origen_id ? inputError : {}),
           }}
-          aria-invalid={!!errors.area_id}
+          aria-invalid={!!errors.area_origen_id}
         >
           <option value="" disabled>
-            {areas.length === 0 ? 'Sin áreas disponibles' : 'Selecciona un área…'}
+            {areas.length === 0 ? 'Sin áreas disponibles' : 'Selecciona tu área…'}
           </option>
           {areas.map((area) => (
             <option key={area.id} value={area.id}>
@@ -175,12 +225,7 @@ export default function TicketForm({ areas }: TicketFormProps) {
             </option>
           ))}
         </select>
-        {areas.length === 0 && (
-          <p className="mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-            Las áreas se configuran desde el panel administrativo.
-          </p>
-        )}
-        <FieldError message={errors.area_id} />
+        <FieldError message={errors.area_origen_id} />
       </div>
 
       <fieldset>
@@ -221,6 +266,42 @@ export default function TicketForm({ areas }: TicketFormProps) {
         </div>
         <FieldError message={errors.prioridad} />
       </fieldset>
+      <div>
+        <label htmlFor="area_id" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--color-text-base)' }}>
+          Área destino <span style={{ color: 'var(--color-danger)' }}>*</span>
+        </label>
+        <select
+          id="area_id"
+          name="area_id"
+          defaultValue=""
+          style={{
+            ...inputBase,
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 0.75rem center',
+            backgroundSize: '1.25rem',
+            paddingRight: '2.5rem',
+            ...(errors.area_id ? inputError : {}),
+          }}
+          aria-invalid={!!errors.area_id}
+        >
+          <option value="" disabled>
+            {areas.length === 0 ? 'Sin áreas disponibles' : 'Selecciona el área que resolverá el ticket…'}
+          </option>
+          {areas.map((area) => (
+            <option key={area.id} value={area.id}>
+              {area.nombre}
+            </option>
+          ))}
+        </select>
+        {areas.length === 0 && (
+          <p className="mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Las áreas se configuran desde el panel administrativo.
+          </p>
+        )}
+        <FieldError message={errors.area_id} />
+      </div>
 
       <div>
         <label htmlFor="mensaje" className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--color-text-base)' }}>

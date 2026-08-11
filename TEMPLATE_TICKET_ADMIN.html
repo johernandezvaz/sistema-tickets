@@ -1,0 +1,164 @@
+﻿<div style="font-family:'Segoe UI',Arial,sans-serif;background-color:#f0f4f8;margin:0;padding:32px 16px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;">
+        <tr>
+            <td>
+
+                <table width="100%" cellpadding="0" cellspacing="0"
+                    style="background:linear-gradient(135deg,#0f2744 0%,#1a3a5c 100%);border-radius:12px 12px 0 0;">
+                    <tr>
+                        <td style="padding:32px 36px;">
+                            <a href="{{ticket_url}}" target="_blank" style="text-decoration:none;">
+                                <img src="https://res.cloudinary.com/dizorsslw/image/upload/v1786471061/bepioshy1o4k2jes89be.png"
+                                    alt="Safe Demo logo" height="40" style="display:block;height:40px;width:auto;" />
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 36px 36px;">
+                            <span style="display:inline-block;background-color:rgba(255,255,255,0.15);color:#a8d5ff;
+                           font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+                           padding:5px 12px;border-radius:20px;margin-bottom:14px;">
+                                Soporte T&eacute;cnico &mdash; Panel Interno
+                            </span>
+                            <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;line-height:1.3;">
+                                Nuevo ticket recibido
+                            </h1>
+                            <p style="margin:10px 0 0;font-size:15px;color:#b8d4ef;line-height:1.6;">
+                                Tienes un nuevo ticket pendiente de atenci&oacute;n en tu &aacute;rea.
+                                Revisa los datos del solicitante y at&iacute;endelo a la brevedad.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+                <table width="100%" cellpadding="0" cellspacing="0"
+                    style="background-color:#ffffff;border-left:1px solid #dde5ef;border-right:1px solid #dde5ef;">
+                    <tr>
+                        <td style="padding:36px;">
+
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#eef5ff 0%,#e0edff 100%);
+                            border:2px solid #3b82f6;border-radius:10px;margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:20px 24px;text-align:center;">
+                                        <p style="margin:0 0 5px;font-size:11px;font-weight:700;letter-spacing:2.5px;
+                               text-transform:uppercase;color:#6b7280;">
+                                            Folio del ticket
+                                        </p>
+                                        <p style="margin:0;font-size:32px;font-weight:800;letter-spacing:6px;
+                               color:#1d4ed8;font-family:'Courier New',Courier,monospace;">
+                                            {{folio}}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:16px 20px;border-radius:8px;text-align:center;
+                             background-color:#fff7ed;border:2px solid #f97316;">
+                                        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:2px;
+                               text-transform:uppercase;color:#9a3412;">
+                                            Prioridad
+                                        </p>
+                                        <p style="margin:0;font-size:22px;font-weight:800;
+                               text-transform:uppercase;letter-spacing:2px;color:#c2410c;">
+                                            {{prioridad}}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:1px;
+                         text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb;padding-bottom:8px;">
+                                Datos del solicitante
+                            </p>
+                            <table width="100%" cellpadding="0" cellspacing="0"
+                                style="border-collapse:collapse;margin-bottom:28px;">
+                                <tr>
+                                    <td style="padding:11px 14px;width:38%;font-size:13px;font-weight:600;color:#374151;
+                             background-color:#f9fafb;border-bottom:1px solid #e5e7eb;">
+                                        Nombre
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:14px;color:#111827;
+                             background-color:#ffffff;border-bottom:1px solid #e5e7eb;">
+                                        {{nombre}} {{apellido}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:11px 14px;font-size:13px;font-weight:600;color:#374151;
+                             background-color:#f9fafb;border-bottom:1px solid #e5e7eb;">
+                                        Correo
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:14px;color:#111827;
+                             background-color:#ffffff;border-bottom:1px solid #e5e7eb;">
+                                        {{email}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:11px 14px;font-size:13px;font-weight:600;color:#374151;
+                             background-color:#f9fafb;border-bottom:1px solid #e5e7eb;">
+                                        &Aacute;rea del solicitante
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:14px;color:#111827;
+                             background-color:#ffffff;border-bottom:1px solid #e5e7eb;">
+                                        {{area_origen}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:11px 14px;font-size:13px;font-weight:600;color:#374151;
+                             background-color:#f9fafb;border-bottom:1px solid #e5e7eb;">
+                                        &Aacute;rea destino
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:14px;color:#111827;
+                             background-color:#ffffff;border-bottom:1px solid #e5e7eb;">
+                                        {{area}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:11px 14px;font-size:13px;font-weight:600;color:#374151;
+                             background-color:#f9fafb;">
+                                        Folio
+                                    </td>
+                                    <td style="padding:11px 14px;font-size:14px;font-weight:700;color:#1d4ed8;
+                             background-color:#ffffff;font-family:'Courier New',Courier,monospace;">
+                                        {{folio}}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+                                <tr>
+                                    <td style="text-align:center;padding:8px 0;">
+                                        <a href="{{ticket_url}}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);
+                              color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;
+                              padding:14px 40px;border-radius:8px;letter-spacing:0.3px;">
+                                            Ver ticket &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+                <table width="100%" cellpadding="0" cellspacing="0"
+                    style="background-color:#0f2744;border-radius:0 0 12px 12px;">
+                    <tr>
+                        <td style="padding:24px 36px;text-align:center;">
+                            <p style="margin:0 0 6px;font-size:13px;color:#94a3b8;line-height:1.6;">
+                                Esta notificaci&oacute;n fue generada autom&aacute;ticamente por el sistema de tickets
+                                de Safe Demo.<br />
+                                No respondas a este correo directamente.
+                            </p>
+                            <p style="margin:12px 0 0;font-size:11px;color:#4e6a88;letter-spacing:0.5px;">
+                                &copy; Safe Demo &mdash; Sistema de Tickets
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+</div>

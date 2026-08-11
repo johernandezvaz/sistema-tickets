@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { TicketEvidencia, StatusTicket } from '@/lib/types';
+import type { TicketEvidencia, StatusTicket, Prioridad } from '@/lib/types';
 import EvidenceGrid from './EvidenceGrid';
 
 
@@ -13,6 +13,7 @@ export interface ResolutionActions {
 interface TicketResolutionControlsProps {
   ticketId?: number | string;
   initialStatus: StatusTicket;
+  initialPrioridad: Prioridad;
   initialHoldActivo: boolean;
   initialHoldMotivo: string;
   initialMensajeResolucion: string;
@@ -30,8 +31,15 @@ const STATUS_OPTIONS: { value: StatusTicket; label: string; color: string }[] = 
   { value: 'cancelado', label: 'Cancelar', color: 'var(--color-danger)' },
 ];
 
+const PRIORIDAD_OPTIONS: { value: Prioridad; label: string; color: string }[] = [
+  { value: 'baja',  label: 'Baja',  color: 'var(--color-text-muted)' },
+  { value: 'media', label: 'Media', color: 'var(--color-warning)' },
+  { value: 'alta',  label: 'Alta',  color: 'var(--color-danger)' },
+];
+
 export default function TicketResolutionControls({
   initialStatus,
+  initialPrioridad,
   initialHoldActivo,
   initialHoldMotivo,
   initialMensajeResolucion,
@@ -42,7 +50,8 @@ export default function TicketResolutionControls({
   submitLabel = 'Guardar cambios',
   size = 'md',
 }: TicketResolutionControlsProps) {
-  const [status, setStatus] = useState<StatusTicket>(initialStatus);
+  const [status, setStatus]         = useState<StatusTicket>(initialStatus);
+  const [prioridad, setPrioridad]   = useState<Prioridad>(initialPrioridad);
   const [holdActivo, setHoldActivo] = useState(initialHoldActivo);
   const [holdMotivo, setHoldMotivo] = useState(initialHoldMotivo);
   const [mensajeResolucion, setMensajeResolucion] = useState(initialMensajeResolucion);
@@ -154,6 +163,7 @@ export default function TicketResolutionControls({
 
     const formData = new FormData();
     formData.append('status', status);
+    formData.append('prioridad', prioridad);
     formData.append('mensaje_resolucion', mensajeResolucion);
     formData.append('hold_activo', String(holdActivo));
     formData.append('hold_motivo', holdMotivo);
@@ -189,6 +199,7 @@ export default function TicketResolutionControls({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+      {/* ---- Selector de Estado ---- */}
       <div>
         <span className={labelClass} style={{ color: 'var(--color-text-muted)' }}>
           Estado
@@ -203,16 +214,34 @@ export default function TicketResolutionControls({
                 onClick={() => handleStatusChange(opt.value)}
                 className="rounded-lg border px-2 py-2 text-xs font-semibold transition-all"
                 style={active
-                  ? {
-                    backgroundColor: opt.color,
-                    borderColor: opt.color,
-                    color: '#fff',
-                  }
-                  : {
-                    backgroundColor: 'transparent',
-                    borderColor: opt.color,
-                    color: opt.color,
-                  }
+                  ? { backgroundColor: opt.color, borderColor: opt.color, color: '#fff' }
+                  : { backgroundColor: 'transparent', borderColor: opt.color, color: opt.color }
+                }
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ---- Selector de Prioridad ---- */}
+      <div>
+        <span className={labelClass} style={{ color: 'var(--color-text-muted)' }}>
+          Prioridad
+        </span>
+        <div className="grid grid-cols-3 gap-2">
+          {PRIORIDAD_OPTIONS.map(opt => {
+            const active = prioridad === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { setPrioridad(opt.value); markDirty(); }}
+                className="rounded-lg border px-2 py-2 text-xs font-semibold transition-all"
+                style={active
+                  ? { backgroundColor: opt.color, borderColor: opt.color, color: '#fff' }
+                  : { backgroundColor: 'transparent', borderColor: opt.color, color: opt.color }
                 }
               >
                 {opt.label}

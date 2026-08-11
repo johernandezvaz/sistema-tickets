@@ -25,6 +25,7 @@ export interface CreateTicketInput {
   apellido: string;
   email: string;
   areaId: number;
+  areaOrigenId: number;
   prioridad: Prioridad;
   mensaje: string;
 }
@@ -34,13 +35,14 @@ export interface TicketFormErrors {
   apellido?: string;
   email?: string;
   area_id?: string;
+  area_origen_id?: string;
   prioridad?: string;
   mensaje?: string;
   _global?: string;
 }
 
 export type SubmitTicketResult =
-  | { ok: true; folio: string }
+  | { ok: true; folio: string; nombre: string; apellido: string; email: string; areaNombre: string; areaOrigenNombre: string; prioridad: Prioridad; adminEmails: string[] }
   | { ok: false; errors: TicketFormErrors };
 
 
@@ -55,9 +57,12 @@ export interface TicketDetalle {
   apellido: string;
   email: string;
   area_nombre: string | null;
+  area_origen_nombre: string | null;
   prioridad: Prioridad;
+  prioridad_original: Prioridad;
   mensaje: string;
   status: StatusTicket;
+  responsable_nombre: string | null;
   mensaje_resolucion: string | null;
   motivo_cancelacion: string | null;
   creado_en: string;

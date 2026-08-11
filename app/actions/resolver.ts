@@ -92,13 +92,21 @@ export async function actualizarTicketAction(
     return { ok: false, error: 'Enlace de resolución vencido o inválido.' };
   }
 
-  const status = formData.get('status') as string;
+  const status         = formData.get('status') as string;
   const mensajeResolucion = (formData.get('mensaje_resolucion') as string || '').trim();
-  const holdActivo = formData.get('hold_activo') === 'true';
-  const holdMotivo = (formData.get('hold_motivo') as string || '').trim();
+  const holdActivo     = formData.get('hold_activo') === 'true';
+  const holdMotivo     = (formData.get('hold_motivo') as string || '').trim();
+  const nuevaPrioridad = (formData.get('prioridad') as string | null)?.trim() || null;
 
-  if (status !== 'levantado' && status !== 'en_proceso' && status !== 'finalizado' && status !== 'cancelado') {
+  const VALID_STATUS    = ['levantado', 'en_proceso', 'finalizado', 'cancelado'];
+  const VALID_PRIORIDAD = ['baja', 'media', 'alta'];
+
+  if (!VALID_STATUS.includes(status)) {
     return { ok: false, error: 'Estado seleccionado inválido.' };
+  }
+
+  if (nuevaPrioridad && !VALID_PRIORIDAD.includes(nuevaPrioridad)) {
+    return { ok: false, error: 'Prioridad seleccionada inválida.' };
   }
 
   if (status === 'finalizado') {
@@ -151,13 +159,18 @@ export async function actualizarTicketAction(
   const { ip, userAgent } = await getRequestMetadata();
 
   try {
+    // El nombre del responsable que usa el link lo usamos como cambiadorNombre
+    const cambiadorNombre = validation.ticket.responsable_nombre ?? null;
+
     await updateTicketResolutionState(
       validation.ticketId,
       status,
       mensajeResolucion,
       holdActivo,
       holdMotivo,
-      ip
+      ip,
+      nuevaPrioridad,
+      cambiadorNombre
     );
 
     const logDetails = `update_ticket to status: ${status}, hold: ${holdActivo}`;

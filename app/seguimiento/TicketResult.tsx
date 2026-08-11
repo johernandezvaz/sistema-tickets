@@ -220,7 +220,10 @@ export default function TicketResult({ ticket }: TicketResultProps) {
         <Field label="Correo">
           {ticket.email}
         </Field>
-        <Field label="Área">
+        <Field label="Área del solicitante">
+          {ticket.area_origen_nombre ?? <span style={{ color: 'var(--color-text-muted)' }}>No especificada</span>}
+        </Field>
+        <Field label="Área destino">
           {ticket.area_nombre ?? <span style={{ color: 'var(--color-text-muted)' }}>No asignada</span>}
         </Field>
         <Field label="Prioridad">

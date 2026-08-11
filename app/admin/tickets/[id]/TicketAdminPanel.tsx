@@ -9,7 +9,7 @@ import {
   resolverDirectamenteAction,
 } from '@/app/admin/actions/admin-tickets';
 import type { AdminTicketDetail } from '@/lib/tickets';
-import type { TicketEvidencia, StatusTicket } from '@/lib/types';
+import type { TicketEvidencia, StatusTicket, Prioridad } from '@/lib/types';
 import TicketResolutionControls, { type ResolutionActions } from '@/app/components/TicketResolutionControls';
 import EvidenceGrid from '@/app/components/EvidenceGrid';
 
@@ -310,6 +310,7 @@ export default function TicketAdminPanel({
 
           <TicketResolutionControls
             initialStatus={ticket.status as StatusTicket}
+            initialPrioridad={ticket.prioridad as Prioridad}
             initialHoldActivo={ticket.hold_activo !== null}
             initialHoldMotivo={ticket.hold_activo?.motivo ?? ''}
             initialMensajeResolucion={
