@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 
-export const UPLOADS_DIR = 'C:\\Users\\JOHERNANDEZ\\Documents\\codigos\\sistema-tickets\\uploads';
+export const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });

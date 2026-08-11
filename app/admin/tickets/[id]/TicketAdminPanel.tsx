@@ -47,7 +47,15 @@ export default function TicketAdminPanel({
 
   const [reasignLoading, setReasignLoading] = useState(false);
 
-  const isResolved = ticket.status === 'finalizado' || ticket.status === 'cancelado';
+  const [ticketStatus, setTicketStatus] = useState<StatusTicket>(ticket.status as StatusTicket);
+  const [resolvedMessage, setResolvedMessage] = useState<string>(
+    ticket.status === 'cancelado'
+      ? (ticket.motivo_cancelacion ?? '')
+      : (ticket.mensaje_resolucion ?? '')
+  );
+  const [evidencias, setEvidencias] = useState<TicketEvidencia[]>(initialEvidencias);
+
+  const isResolved = ticketStatus === 'finalizado' || ticketStatus === 'cancelado';
   const isSuperadmin = userRol === 'superadmin';
 
   const sinAsignar = ticket.responsable_nombre === null;
@@ -55,10 +63,25 @@ export default function TicketAdminPanel({
 
   const resolveActions: ResolutionActions = {
     uploadEvidence: useCallback(async (formData: FormData) => {
-      return subirEvidenciaAdminAction(ticket.id, formData);
+      const res = await subirEvidenciaAdminAction(ticket.id, formData);
+      if (res.ok && res.evidencia) {
+        setEvidencias(prev => [...prev, res.evidencia!]);
+      }
+      return res;
     }, [ticket.id]),
     submitResolution: useCallback(async (formData: FormData) => {
-      return resolverDirectamenteAction(ticket.id, formData);
+      const res = await resolverDirectamenteAction(ticket.id, formData);
+      const newStatus = formData.get('status') as StatusTicket;
+      const newMensaje = formData.get('mensaje_resolucion') as string;
+      if (res.ok) {
+        if (newMensaje) {
+          setResolvedMessage(newMensaje);
+        }
+        if (newStatus === 'finalizado' || newStatus === 'cancelado') {
+          setTicketStatus(newStatus);
+        }
+      }
+      return res;
     }, [ticket.id]),
   };
 
@@ -175,11 +198,11 @@ export default function TicketAdminPanel({
   }
 
   if (isResolved) {
-    const isCancelledStatus = ticket.status === 'cancelado';
+    const isCancelledStatus = ticketStatus === 'cancelado';
     return (
       <div className="flex flex-col gap-4">
         <div
-          className="rounded-lg border p-4 text-center text-sm"
+          className="rounded-lg border p-4 text-center text-sm font-semibold"
           style={{
             borderColor: isCancelledStatus ? 'var(--color-danger)' : 'var(--color-success)',
             backgroundColor: isCancelledStatus
@@ -193,13 +216,37 @@ export default function TicketAdminPanel({
             : 'Este ticket ya ha sido finalizado. No se permiten realizar modificaciones o asignaciones.'}
         </div>
 
-        {!isCancelledStatus && initialEvidencias.length > 0 && (
+        {resolvedMessage && (
+          <div
+            className="rounded-xl border p-5"
+            style={{
+              borderColor: isCancelledStatus
+                ? 'color-mix(in srgb, var(--color-danger) 30%, transparent)'
+                : 'color-mix(in srgb, var(--color-success) 30%, transparent)',
+              backgroundColor: isCancelledStatus
+                ? 'color-mix(in srgb, var(--color-danger) 6%, transparent)'
+                : 'color-mix(in srgb, var(--color-success) 6%, transparent)',
+            }}
+          >
+            <h4
+              className="text-xs font-bold uppercase tracking-wider mb-2"
+              style={{ color: isCancelledStatus ? 'var(--color-danger)' : 'var(--color-success)' }}
+            >
+              {isCancelledStatus ? 'Motivo de cancelación' : 'Resolución del ticket'}
+            </h4>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-base)' }}>
+              {resolvedMessage}
+            </p>
+          </div>
+        )}
+
+        {!isCancelledStatus && evidencias.length > 0 && (
           <div className="rounded-xl border p-5" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', backgroundColor: 'color-mix(in srgb, var(--color-success) 6%, transparent)' }}>
             <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--color-success)' }}>
               Evidencias adjuntas
             </p>
             <EvidenceGrid
-              evidencias={initialEvidencias}
+              evidencias={evidencias}
               urlPrefix="/api/evidencia/admin"
               cols="two"
               thumbnailHeight="h-20"
